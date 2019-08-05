@@ -9,13 +9,14 @@
 import UIKit
 
 class MessageCell: BaseCell {
-    /*
+    
     var message: Message? {
         didSet {
             nameLabel.text = message?.friend?.name
             
             if let profileImageName = message?.friend?.profileImageName {
                 profileImageView.image = UIImage(named: profileImageName)
+                hasReadImageView.image = UIImage(named: profileImageName)
             }
             
             if let date = message?.date {
@@ -25,7 +26,7 @@ class MessageCell: BaseCell {
             }
         }
     }
-    */
+    
     private struct Constants {
         static let profileImageCornerRadius: CGFloat = 35.0
         static let profileImageLeft: CGFloat = 10.0

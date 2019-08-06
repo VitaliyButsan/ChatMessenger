@@ -115,7 +115,7 @@ class FriendsController: UICollectionViewController {
         kuchma.name = "Kuchma Leonid"
         kuchma.profileImageName = "1"
         
-        createMessageWithText(text: "My name is Leonid", friend: kuchma, minutesAgo: 0, context: context)
+        createMessageWithText(text: "My name is Leonid", friend: kuchma, minutesAgo: 60 * 24 * 8, context: context)
         
         do {
             try context.save()

@@ -13,6 +13,7 @@ class MessageCell: BaseCell {
     var message: Message? {
         didSet {
             nameLabel.text = message?.friend?.name
+            messageLabel.text = message?.text
             
             if let profileImageName = message?.friend?.profileImageName {
                 profileImageView.image = UIImage(named: profileImageName)

@@ -15,15 +15,25 @@ class FriendsController: UICollectionViewController {
         static let cellIdentifier: String = "Cell"
         static let mainTitle: String = "Recent"
         static let cellHeight: CGFloat = 100.0
+        static let friendEntityName: String = "Friend"
+        static let messageEntityName: String = "Message"
     }
     
     var messages: [Message]?
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        collectionView.backgroundColor = .white
+        navigationItem.title = Constants.mainTitle
+        collectionView?.register(MessageCell.self, forCellWithReuseIdentifier: Constants.cellIdentifier)
+        setupData()
+    }
     
     func clearData() {
         let delegate = UIApplication.shared.delegate as? AppDelegate
         
         if let context = delegate?.persistentContainer.viewContext {
-            let entityNames = ["Friend", "Message"]
+            let entityNames = [Constants.friendEntityName, Constants.messageEntityName]
             
             for entityName in entityNames {
                 let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: entityName)
@@ -45,14 +55,39 @@ class FriendsController: UICollectionViewController {
         let delegate = UIApplication.shared.delegate as? AppDelegate
         
         if let context = delegate?.persistentContainer.viewContext {
-            let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Message")
+            
+            guard let friends = fetchFriends() else { return }
+            messages = [Message]()
+            
+            for friend in friends {
+                let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: Constants.messageEntityName)
+                fetchRequest.sortDescriptors = [NSSortDescriptor(key: "date", ascending: false)]
+                fetchRequest.predicate = NSPredicate(format: "friend.name = %@", friend.name!)
+                fetchRequest.fetchLimit = 1
+                
+                do {
+                    let fetchMessages = try context.fetch(fetchRequest) as? [Message]
+                    messages?.append(contentsOf: fetchMessages!)
+                } catch {
+                    print(error)
+                }
+            }
+            messages = messages?.sorted(by: { $0.date!.compare($1.date!) == .orderedDescending })
+        }
+    }
+    
+    private func fetchFriends() -> [Friend]? {
+        let delegate = UIApplication.shared.delegate as? AppDelegate
+        if let context = delegate?.persistentContainer.viewContext {
+            let request = NSFetchRequest<NSFetchRequestResult>(entityName: Constants.friendEntityName)
             
             do {
-                messages = try context.fetch(fetchRequest) as? [Message]
-            } catch {
+                return try context.fetch(request) as? [Friend]
+            } catch let error {
                 print(error)
             }
         }
+        return nil
     }
     
     func setupData() {
@@ -61,25 +96,35 @@ class FriendsController: UICollectionViewController {
         
         guard let delegate = UIApplication.shared.delegate as? AppDelegate else { return }
         let context = delegate.persistentContainer.viewContext
-
-        let porokh = NSEntityDescription.insertNewObject(forEntityName: "Friend", into: context) as! Friend
+        //====================================================
+        let porokh = NSEntityDescription.insertNewObject(forEntityName: Constants.friendEntityName, into: context) as! Friend
         porokh.name = "Poroshenko Pavlo"
         porokh.profileImageName = "3"
-
-        let message = NSEntityDescription.insertNewObject(forEntityName: "Message", into: context) as! Message
-        message.friend = porokh
-        message.text = "Hello, friends. I writte fine programm for all of your's."
-        message.date = Date()
+ 
+        createMessageWithText(text: "Hello, friends.", friend: porokh, minutesAgo: 3, context: context)
+        createMessageWithText(text: "Hello, friends. I'am here.", friend: porokh, minutesAgo: 2, context: context)
+        createMessageWithText(text: "Hello, friends. I'am a new president. I'am very bezy now. I you hava a quastion to me, that a time to get it. I'am work on this post long 4 years, and nothing to regret.", friend: porokh, minutesAgo: 1, context: context)
         //----------------------------------------------------
-        let karl = NSEntityDescription.insertNewObject(forEntityName: "Friend", into: context) as! Friend
-        karl.name = "Karl"
-        karl.profileImageName = "4"
+        let vladimir = NSEntityDescription.insertNewObject(forEntityName: Constants.friendEntityName, into: context) as! Friend
+        vladimir.name = "Vladimir Zel"
+        vladimir.profileImageName = "4"
 
-        let karlMessage = NSEntityDescription.insertNewObject(forEntityName: "Message", into: context) as! Message
-        karlMessage.friend = karl
-        karlMessage.text = "Hello, friends. I writte fine programm for all of your's."
-        karlMessage.date = Date()
-
+        createMessageWithText(text: "Hello, i am a Vlidimir! I'am a new president of Ucraine. And a like this post.", friend: vladimir, minutesAgo: 4, context: context)
+        //----------------------------------------------------
+        let kuchma = NSEntityDescription.insertNewObject(forEntityName: Constants.friendEntityName, into: context) as! Friend
+        kuchma.name = "Leonid Kuchma"
+        kuchma.profileImageName = "1"
+        
+        createMessageWithText(text: "My name is Leonid", friend: kuchma, minutesAgo: 60 * 24 * 8, context: context)
+        //----------------------------------------------------
+        let youshchenko = NSEntityDescription.insertNewObject(forEntityName: Constants.friendEntityName, into: context) as! Friend
+        youshchenko.name = "Victor Youshchenko"
+        youshchenko.profileImageName = "2"
+        
+        createMessageWithText(text: "Hello, my name is Victor", friend: youshchenko, minutesAgo: 15, context: context)
+        createMessageWithText(text: "I'am glad to se all of you.", friend: youshchenko, minutesAgo: 12, context: context)
+        //====================================================
+        
         do {
             try context.save()
         } catch {
@@ -89,14 +134,30 @@ class FriendsController: UICollectionViewController {
         loadData()
     }
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        collectionView.backgroundColor = .white
-        navigationItem.title = Constants.mainTitle
-        collectionView?.register(MessageCell.self, forCellWithReuseIdentifier: Constants.cellIdentifier)
-        setupData()
+    private func createMessageWithText(text: String, friend: Friend, minutesAgo: Double, context: NSManagedObjectContext) {
+        let message = NSEntityDescription.insertNewObject(forEntityName: Constants.messageEntityName, into: context) as! Message
+        message.friend = friend
+        message.text = text
+        message.date = Date().addingTimeInterval(-minutesAgo * 60)
     }
+}
 
+// MARK: - UICollectionViewDelegate
+
+extension FriendsController {
+    
+    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let layout = UICollectionViewFlowLayout()
+        let chatController = ChatLogController(collectionViewLayout: layout)
+        chatController.friend = messages?[indexPath.item].friend
+        navigationController?.pushViewController(chatController, animated: true)
+    }
+}
+
+// MARK: - UICollectionViewDataSource
+
+extension FriendsController {
+    
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if let count = messages?.count {
             return count

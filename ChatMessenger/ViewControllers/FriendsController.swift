@@ -96,26 +96,34 @@ class FriendsController: UICollectionViewController {
         
         guard let delegate = UIApplication.shared.delegate as? AppDelegate else { return }
         let context = delegate.persistentContainer.viewContext
-
+        //====================================================
         let porokh = NSEntityDescription.insertNewObject(forEntityName: Constants.friendEntityName, into: context) as! Friend
         porokh.name = "Poroshenko Pavlo"
         porokh.profileImageName = "3"
  
         createMessageWithText(text: "Hello, friends.", friend: porokh, minutesAgo: 3, context: context)
         createMessageWithText(text: "Hello, friends. I'am here.", friend: porokh, minutesAgo: 2, context: context)
-        createMessageWithText(text: "Hello, friends. I'am a new president", friend: porokh, minutesAgo: 1, context: context)
+        createMessageWithText(text: "Hello, friends. I'am a new president. I'am very bezy now. I you hava a quastion to me, that a time to get it. I'am work on this post long 4 years, and nothing to regret.", friend: porokh, minutesAgo: 1, context: context)
         //----------------------------------------------------
         let vladimir = NSEntityDescription.insertNewObject(forEntityName: Constants.friendEntityName, into: context) as! Friend
         vladimir.name = "Vladimir Zel"
         vladimir.profileImageName = "4"
 
-        createMessageWithText(text: "Hello, i am a Vlidimir!", friend: vladimir, minutesAgo: 4, context: context)
-        
+        createMessageWithText(text: "Hello, i am a Vlidimir! I'am a new president of Ucraine. And a like this post.", friend: vladimir, minutesAgo: 4, context: context)
+        //----------------------------------------------------
         let kuchma = NSEntityDescription.insertNewObject(forEntityName: Constants.friendEntityName, into: context) as! Friend
-        kuchma.name = "Kuchma Leonid"
+        kuchma.name = "Leonid Kuchma"
         kuchma.profileImageName = "1"
         
         createMessageWithText(text: "My name is Leonid", friend: kuchma, minutesAgo: 60 * 24 * 8, context: context)
+        //----------------------------------------------------
+        let youshchenko = NSEntityDescription.insertNewObject(forEntityName: Constants.friendEntityName, into: context) as! Friend
+        youshchenko.name = "Victor Youshchenko"
+        youshchenko.profileImageName = "2"
+        
+        createMessageWithText(text: "Hello, my name is Victor", friend: youshchenko, minutesAgo: 15, context: context)
+        createMessageWithText(text: "I'am glad to se all of you.", friend: youshchenko, minutesAgo: 12, context: context)
+        //====================================================
         
         do {
             try context.save()

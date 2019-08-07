@@ -10,42 +10,6 @@ import UIKit
 
 class MessageCell: BaseCell {
     
-    override var isHighlighted: Bool {
-        didSet {
-            backgroundColor = isHighlighted ? UIColor(red: 0, green: 134/255, blue: 249/255, alpha: 1) : .white
-            nameLabel.textColor = isHighlighted ? .white : .black
-            timeLabel.textColor = isHighlighted ? .white : .black
-            messageLabel.textColor = isHighlighted ? .white : .black
-        }
-    }
-    
-    var message: Message? {
-        didSet {
-            nameLabel.text = message?.friend?.name
-            messageLabel.text = message?.text
-            
-            if let profileImageName = message?.friend?.profileImageName {
-                profileImageView.image = UIImage(named: profileImageName)
-                hasReadImageView.image = UIImage(named: profileImageName)
-            }
-            
-            if let date = message?.date {
-                let dateFormatter = DateFormatter()
-                dateFormatter.dateFormat = "HH:mm"
-                let elapsedTimeInSeconds = Date().timeIntervalSince(date)
-                let secondInDays: TimeInterval = 60 * 60 * 24
-                
-                if elapsedTimeInSeconds > 7 * secondInDays {
-                    dateFormatter.dateFormat = "MM/dd/yy"
-                } else if elapsedTimeInSeconds > secondInDays {
-                    dateFormatter.dateFormat = "EEE"
-                }
-
-                timeLabel.text = dateFormatter.string(from: date)
-            }
-        }
-    }
-    
     private struct Constants {
         static let profileImageCornerRadius: CGFloat = 35.0
         static let profileImageLeft: CGFloat = 10.0
@@ -87,6 +51,42 @@ class MessageCell: BaseCell {
         static let hasReadImage: UIImage = UIImage(named: "1")!
     }
     
+    override var isHighlighted: Bool {
+        didSet {
+            backgroundColor = isHighlighted ? UIColor(red: 0, green: 134/255, blue: 249/255, alpha: 1) : .white
+            nameLabel.textColor = isHighlighted ? .white : .black
+            timeLabel.textColor = isHighlighted ? .white : .black
+            messageLabel.textColor = isHighlighted ? .white : .black
+        }
+    }
+    
+    var message: Message? {
+        didSet {
+            nameLabel.text = message?.friend?.name
+            messageLabel.text = message?.text
+            
+            if let profileImageName = message?.friend?.profileImageName {
+                profileImageView.image = UIImage(named: profileImageName)
+                hasReadImageView.image = UIImage(named: profileImageName)
+            }
+            
+            if let date = message?.date {
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "HH:mm"
+                let elapsedTimeInSeconds = Date().timeIntervalSince(date)
+                let secondInDays: TimeInterval = 60 * 60 * 24
+                
+                if elapsedTimeInSeconds > 7 * secondInDays {
+                    dateFormatter.dateFormat = "MM/dd/yy"
+                } else if elapsedTimeInSeconds > secondInDays {
+                    dateFormatter.dateFormat = "EEE"
+                }
+
+                timeLabel.text = dateFormatter.string(from: date)
+            }
+        }
+    }
+
     private let profileImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.image = Constants.profileImage
